@@ -1,28 +1,35 @@
+// models/Message.js
 const mongoose = require("mongoose");
 
 const MessageSchema = new mongoose.Schema({
-  // The message ID from the webhook payload
-  id: { type: String, required: true, unique: true },
-
-  // The user's WhatsApp ID (e.g., "919xxxxxxxxx")
-  wa_id: { type: String, required: true },
-  from: { type: String, required: true },
-  // The user's name
-  name: { type: String, required: true },
-
-  // The message content
-  text: { type: String, required: true },
-
-  // The timestamp of the message
-  timestamp: { type: Number, required: true },
-
-  // The status of the message: 'sent', 'delivered', or 'read'
-  status: { type: String, default: "sent" },
+  sender: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', // Reference to the User model
+    required: true,
+  },
+  recipient: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', // Reference to the User model
+    required: true,
+  },
+  text: {
+    type: String,
+    required: true,
+  },
+  timestamp: {
+    type: Number,
+    required: true,
+  },
+  status: {
+    type: String,
+    enum: ['sent', 'delivered', 'read'],
+    default: 'sent',
+  },
 });
 
-// Create an index on wa_id and timestamp for faster querying
-MessageSchema.index({ wa_id: 1, timestamp: -1 });
+// Create compound index for fast querying of conversations
+MessageSchema.index({ sender: 1, recipient: 1 });
 
-const Message = mongoose.model("processed_message", MessageSchema);
+const Message = mongoose.model("Message", MessageSchema); // Renamed for clarity
 
 module.exports = Message;
