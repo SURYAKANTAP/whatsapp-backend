@@ -318,6 +318,16 @@ io.on('connection', (socket) => {
     socket.emit('receiveMessage', newMessage);
   });
 
+
+   // This new handler allows the client to request the current online list at any time.
+  socket.on('getInitialOnlineUsers', () => {
+    // Get the current list of online user IDs from your in-memory map
+    const onlineUserIds = Array.from(userSocketMap.keys());
+
+    // Send the list back ONLY to the client that asked for it
+    socket.emit('onlineUsersUpdate', onlineUserIds);
+  });
+
   // 5. User disconnects
   socket.on('disconnect', async () => {
     if (socket.userId) {
